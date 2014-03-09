@@ -40,7 +40,7 @@ public class Driver {
 
         job.setJarByClass(Driver.class);
 
-        job.setOutputKeyClass(IntWritable.class);
+        job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Words.class);
 
         job.setMapperClass(Map.class);

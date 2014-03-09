@@ -25,20 +25,24 @@ import org.apache.hadoop.util.ToolRunner;
 
 class Map extends Mapper<LongWritable, Text, Text, Words>
 {
-    @Override
+    //Override
     protected void map(LongWritable key, Text value, Context context)
             throws IOException, InterruptedException {
-            FileSplit fileSplit = (FileSplit) context.getInputSplit();
-            Path inputDir = fileSplit.getPath().getParent();
-            StringTokenizer filename = new StringTokenizer(value.toString());
-            while (filename.hasMoreTokens()) {
-            Path path = new Path(inputDir, filename.nextToken());
-            process(path,context);
-            }
+        String file=value.toString().toLowerCase();
+        StringTokenizer contents = new StringTokenizer(file);
+        String url=file.substring(0,5);
+        int pos = 0;
+        while (contents.hasMoreTokens()) {
+            Words w=new Words();
+            w.url=url;
+            w.position=pos;
+            context.write(new Text(contents.nextToken()), w);
+            pos++;
+        }
     }
 
     //process a file
-    protected void process(Path file, Context context) throws IOException,
+    /*protected void process(Path file, Context context) throws IOException,
             InterruptedException {
 
         String filename = file.getName();
@@ -58,5 +62,5 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
                 pos++;
             }
         }
-    }
+    }*/
 }

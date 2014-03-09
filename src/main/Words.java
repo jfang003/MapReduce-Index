@@ -7,18 +7,10 @@ import java.io.DataOutput;
  * Created by cloudera on 3/8/14.
  */
 public class Words implements Writable{
-    private String url;
-    private int position;
+    public String url;
+    public int position;
 
     public Words(){}
-
-    public void set_url(String w){
-        url=w;
-    }
-
-    public void set_pos(int p){
-        position=p;
-    }
 
     /**
      * Mandatory function for implementing writable
