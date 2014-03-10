@@ -30,9 +30,9 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
     //Override
     protected void map(LongWritable key, Text value, Context context)
             throws IOException, InterruptedException {
-        String url="";
-        String pattern="##$$$$$";
-        int pos = 0;
+        //String url="";
+        //String pattern="##$$$$$";
+        //int pos = 0;
         /*
         for(Text t: value)
         {
@@ -83,12 +83,18 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
                 new InputStreamReader(in));
         String line = null;
         int pos=0;
+        boolean first=true;
+        Words w=new Words();
         while ((line = reader.readLine()) != null) {
             System.out.println(line);
-            if (line.contains(pattern)==true)
+            if (line.contains(pattern))
             {
                 url=line.substring(7,line.length()-7);
                 System.out.println(url);
+                w.position=pos;
+                if(first) continue;
+                first=false;
+                context.write(new Text("URL_Length"),w);
                 pos=0;
                 continue;
             }
@@ -96,12 +102,13 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
             StringTokenizer contents = new StringTokenizer(line.toLowerCase());
             while (contents.hasMoreTokens()) {
                 String word=contents.nextToken();
-                Words w=new Words();
                 w.url=url;
                 w.position=pos;
                 context.write(new Text(word), w);
                 pos++;
             }
         }
+        w.position=pos;
+        context.write(new Text("URL_Length"),w);
     }
 }
