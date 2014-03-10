@@ -41,7 +41,9 @@ class Reduce extends Reducer<Text, Words, Text, Text> {
                 String o= w.url+" "+w.position+"\n";
                 System.out.println(o);
                 br.write(o);
+                count++;
             }
+            br.write("Total: "+count);
             br.close();
         }
     }
