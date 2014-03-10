@@ -22,29 +22,60 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 class Map extends Mapper<LongWritable, Text, Text, Words>
 {
     //Override
     protected void map(LongWritable key, Text value, Context context)
             throws IOException, InterruptedException {
-        String file=value.toString().toLowerCase();
-        StringTokenizer contents = new StringTokenizer(file);
-        String url=file.substring(0,5);
+        String url="";
+        String pattern="##$$$$$";
         int pos = 0;
+        /*
+        for(Text t: value)
+        {
+            String line=value.toString();
+            if (line.substring(0,7)==pattern)
+            {
+                url=line.substring(7,line.length()-7);
+                pos=0;
+                continue;
+            }
+            line=line.replaceAll("[^\\w\\d]"," ");
+            StringTokenizer contents = new StringTokenizer(line.toLowerCase());
+            while (contents.hasMoreTokens()) {
+                String word=contents.nextToken();
+                Words w=new Words();
+                w.url=url;
+                w.position=pos;
+                context.write(new Text(word), w);
+                pos++;
+            }
+        }*/
+
+        //, " ,?!:;()<>[]\b\t\n\f\r\"\'\\\""
+        /*FileSplit fileSplit = (FileSplit)context.getInputSplit();
+        String filename = fileSplit.getPath().getName();
+        System.out.println("File name "+filename+"\n Directory and File name"+fileSplit.getPath().toString()+value.toString());
+        StringTokenizer contents = new StringTokenizer(value.toString().toLowerCase());
         while (contents.hasMoreTokens()) {
+            String word=contents.nextToken();
             Words w=new Words();
             w.url=url;
             w.position=pos;
-            context.write(new Text(contents.nextToken()), w);
+            context.write(new Text(word), w);
             pos++;
-        }
+        }*/
+        process(new Path(value.toString()),context);
     }
 
     //process a file
-    /*protected void process(Path file, Context context) throws IOException,
+    protected void process(Path file, Context context) throws IOException,
             InterruptedException {
-
+        String url="";
+        String pattern="##$$$$$";
         String filename = file.getName();
         FileSystem fs = FileSystem.get(new Configuration());
         FSDataInputStream in = fs.open(file);
@@ -53,14 +84,24 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
         String line = null;
         int pos=0;
         while ((line = reader.readLine()) != null) {
-            String[] strs = line.split("[^a-zA-Z']+");
-            for (String s : strs){
+            System.out.println(line);
+            if (line.contains(pattern)==true)
+            {
+                url=line.substring(7,line.length()-7);
+                System.out.println(url);
+                pos=0;
+                continue;
+            }
+            line=line.replaceAll("[^\\w\\d]"," ");
+            StringTokenizer contents = new StringTokenizer(line.toLowerCase());
+            while (contents.hasMoreTokens()) {
+                String word=contents.nextToken();
                 Words w=new Words();
-                w.set_url(filename);
-                w.set_pos(pos);
-                context.write(new Text(s),w);
+                w.url=url;
+                w.position=pos;
+                context.write(new Text(word), w);
                 pos++;
             }
         }
-    }*/
+    }
 }
