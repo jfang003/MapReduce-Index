@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.*;
 import java.net.*;
+
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.conf.*;
 import org.apache.hadoop.io.*;
@@ -16,7 +18,7 @@ public class Driver {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         //String s = args[0].length() > 0 ? args[0] : "skyline.in";
-        Path input, output;
+        Path input, output,stopwords;
         Configuration conf = new Configuration();
         Path hdfsinput;
         String inputfile="";
@@ -38,6 +40,13 @@ public class Driver {
             //FileSystem.getLocal(conf).delete(output, true);;
         } catch (ArrayIndexOutOfBoundsException e) {
             output = new Path("hdfs://localhost.localdomain/user/cloudera/out/");
+            //FileSystem.getLocal(conf).delete(output, true);;
+        }
+        try {
+            stopwords = new Path(args[2]);
+            //FileSystem.getLocal(conf).delete(output, true);;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            stopwords=new Path("hdfs://localhost.localdomain/user/cloudera/wordcount/patterns.txt");
             //FileSystem.getLocal(conf).delete(output, true);;
         }
 
@@ -71,6 +80,8 @@ public class Driver {
         }
         */
 
+        DistributedCache.addCacheFile(stopwords.toUri(), conf);
+        System.out.println("Added: "+stopwords);
         Job job = new Job(conf, "driver");
 
         job.setJarByClass(Driver.class);

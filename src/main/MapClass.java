@@ -1,13 +1,13 @@
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.StringTokenizer;
+import java.net.URI;
+import java.util.*;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -20,6 +20,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.util.StringUtils;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import java.util.regex.Pattern;
@@ -27,6 +28,49 @@ import java.util.regex.Matcher;
 
 class Map extends Mapper<LongWritable, Text, Text, Words>
 {
+    private Set<String> patternsToSkip = new HashSet<String>();
+    private void parseSkipFile(Path patternsFile, Configuration conf) throws IOException {
+        FSDataInputStream in = FileSystem.get(conf).open(patternsFile);
+        try {
+            //BufferedReader fis = new BufferedReader(new FileReader(patternsFile.toString()));
+            BufferedReader fis = new BufferedReader(new InputStreamReader(in));
+            String pattern = null;
+            while ((pattern = fis.readLine()) != null) {
+                //pattern=pattern.replaceAll("^\\w","");
+                //System.out.println("Pattern: "+pattern);
+                patternsToSkip.add(pattern.toLowerCase());
+            }
+        } catch (IOException ioe) {
+            System.err.println("Caught exception while parsing the cached file '" + patternsFile + "' : "
+                    + StringUtils.stringifyException(ioe));
+        }
+    }
+
+    protected void setup(Context context)throws IOException,InterruptedException{
+        Configuration conf = context.getConfiguration();
+        if(DistributedCache.getCacheFiles(conf)!=null)
+        {
+            URI[] cacheFile= DistributedCache.getCacheFiles(conf);
+            for(int i=0;i<cacheFile.length;i++)
+            {
+                System.out.println("Cache File: "+cacheFile[i].getPath());
+                parseSkipFile(new Path(cacheFile[i].getPath()),conf);
+            }
+        }
+        else
+        {
+            Path[] cacheFile=DistributedCache.getLocalCacheFiles(conf);
+            for(int i=0;i<cacheFile.length;i++)
+            {
+                System.out.println("Local Cache File: "+cacheFile[i]);
+                parseSkipFile(cacheFile[i],conf);
+            }
+        }
+        for(String s: patternsToSkip)
+        {
+            System.out.println("Pattern: "+s);
+        }
+    }
     //Override
     protected void map(LongWritable key, Text value, Context context)
             throws IOException, InterruptedException {
@@ -34,6 +78,7 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
         //String pattern="##$$$$$";
         //int pos = 0;
         /*
+
         for(Text t: value)
         {
             String line=value.toString();
@@ -68,6 +113,7 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
             context.write(new Text(word), w);
             pos++;
         }*/
+
         process(new Path(value.toString()),context);
     }
 
