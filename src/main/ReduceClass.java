@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.*;
 import java.util.Map;
+//import org.apache.hadoop.mapreduce.lib.output;
 
 /**
  * Created by cloudera on 3/7/14.
@@ -46,20 +47,32 @@ class Reduce extends Reducer<Text, Words, Text, Text> {
         String pairs="";
         int count=0;
         map = new TreeMap<String, List<Integer>>();
+        String id = context.getTaskAttemptID().getTaskID().toString();
+        String output=FileOutputFormat.getOutputPath(context).toString();
+        if(output=="") System.out.println("No output path");
+        else System.out.println(output);
+        if(output.substring(output.length()-1)!="/") output+="/";
+        FileSystem fs = FileSystem.get(new Configuration());
         if(key.toString().contains("URL_Length")==false)
         {
+            boolean first=false;
+            FSDataOutputStream out = fs.create(new Path(output+key.toString()));
+            BufferedWriter br=new BufferedWriter(new OutputStreamWriter(out));
             for(Words w: words){
-                //pairs+="("+w.url+","+w.position+") ";
+                if (first) pairs=pairs+"\n";
+                first=true;
+                pairs+="("+w.url+","+w.position+")";
                 count++;
-                List<Integer> values;
+                /*List<Integer> values;
                 Object value=map.get(w.url);
                 if(value==null) values= new ArrayList();
                 else values=(List<Integer>) value;
                 if(values==null) System.out.println("Values is null");
                 values.add(w.position);
                 map.put(w.url,values);
-                System.out.printf("Key %s, url %s %d\n", key.toString(),w.url,w.position);
+                System.out.printf("Key %s, url %s %d\n", key.toString(),w.url,w.position);*/
             }
+            /*
             System.out.println("Mapped "+map.toString());
             ArrayList<String> set=new ArrayList<String>(map.keySet());
 
@@ -75,17 +88,14 @@ class Reduce extends Reducer<Text, Words, Text, Text> {
                     pairs=pairs+value.get(i);
                 }
                 pairs=pairs+")] ";
-            }
-            context.write(key,new Text(count+" "+pairs));
+            }*/
+            br.write(key.toString()+" "+count+"\n"+pairs+"\n");
+            br.close();
         }
         else
         {
-            String output=FileOutputFormat.getOutputPath(context).toString();
-            if(output=="") System.out.println("No output path");
-            else System.out.println(output);
-            if(output.substring(output.length()-1)!="/") output+="/";
-            FileSystem fs = FileSystem.get(new Configuration());
-            FSDataOutputStream out = fs.create(new Path(output+"URL_length.txt"));
+            //deal with +id for URL_Length later
+            FSDataOutputStream out = fs.create(new Path(output+"URL_length"));
             BufferedWriter br=new BufferedWriter(new OutputStreamWriter(out));
             for(Words w: words){
                 String o= w.url+" "+w.position+"\n";
@@ -93,7 +103,7 @@ class Reduce extends Reducer<Text, Words, Text, Text> {
                 br.write(o);
                 count++;
             }
-            br.write("Total: "+count);
+            br.write("Total: "+count+"\n");
             br.close();
         }
     }
