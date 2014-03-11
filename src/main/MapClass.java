@@ -140,10 +140,28 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
                 url=line.substring(7,line.length()-7);
                 System.out.println(url);
                 w.position=pos;
-                if(first) continue;
-                first=false;
+                if(first)
+                {
+                    first=false;
+                    continue;
+                }
+                for (int i=0;i<list.size();i++)
+                {
+                    System.out.println(pos);
+                    Words words1=list.get(i);
+                    Words ww=new Words();
+                    ww.doc_len=pos;
+                    ww.url= words1.url;
+                    ww.position=words1.position;
+                    ww.word=words1.word;
+                    System.out.println(words1.word+ww.doc_len);
+                    context.write(new Text(ww.word), ww);
+                }
                 context.write(new Text("URL_Length"),w);
+                System.out.println("AFTer sending the keys");
+                list=new ArrayList<Words>();
                 pos=0;
+                System.out.println("Continuing onto "+url);
                 continue;
             }
             line=line.replaceAll("[^\\w\\d]"," ");
