@@ -9,10 +9,10 @@ import java.io.DataOutput;
  * Created by cloudera on 3/8/14.
  */
 public class Words implements Writable{
-    public String url;
-    public int position;
-    public int doc_len;
-    public String word;
+    public String url="";
+    public int position=-1;
+    public int doc_len=-1;
+    public String word="";
 
     public Words(){
     }
