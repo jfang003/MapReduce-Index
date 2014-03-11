@@ -61,7 +61,8 @@ class Reduce extends Reducer<Text, Words, Text, Text> {
             for(Words w: words){
                 if (first) pairs=pairs+"\n";
                 first=true;
-                pairs+="("+w.url+","+w.position+")";
+                System.out.println("Doc_len: "+w.doc_len);
+                pairs+="("+w.url+","+w.position+","+w.doc_len+")";
                 count++;
                 /*List<Integer> values;
                 Object value=map.get(w.url);
@@ -97,17 +98,17 @@ class Reduce extends Reducer<Text, Words, Text, Text> {
             //deal with +id for URL_Length later
             FSDataOutputStream out = fs.create(new Path(output+"URL-length_"+id));
             BufferedWriter br=new BufferedWriter(new OutputStreamWriter(out));
-            String values="";
+            //String values="";
             boolean first=true;
             for(Words w: words){
-                if(first) first=false;
-                else values=values+"\n";
-                values= values+w.url+" "+w.position;
-                System.out.println(values);
+                //if(first) first=false;
+               // else values=values+"\n";
+               // values= values+w.url+" "+w.position;
+                //System.out.println(values);
                 //br.write(o);
                 count++;
             }
-            br.write("Total "+count+"\n"+values);
+            br.write("Total "+count+"\n");
             br.close();
         }
     }

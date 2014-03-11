@@ -1,3 +1,5 @@
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import java.io.IOException;
 import java.io.DataInput;
@@ -9,8 +11,12 @@ import java.io.DataOutput;
 public class Words implements Writable{
     public String url;
     public int position;
+    public int doc_len;
+    public String word;
 
-    public Words(){}
+    public Words(){
+    }
+
 
     /**
      * Mandatory function for implementing writable
@@ -21,6 +27,8 @@ public class Words implements Writable{
     public void readFields(DataInput in) throws IOException {
         this.url=in.readUTF();
         this.position=in.readInt();
+        this.doc_len=in.readInt();
+        this.word=in.readUTF();
     }
 
     /**
@@ -32,5 +40,7 @@ public class Words implements Writable{
     public void write(DataOutput out) throws IOException {
         out.writeUTF(this.url);
         out.writeInt(this.position);
+        out.writeInt(this.doc_len);
+        out.writeUTF(this.word);
     }
 }

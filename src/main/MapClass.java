@@ -54,7 +54,7 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
             for(int i=0;i<cacheFile.length;i++)
             {
                 System.out.println("Cache File: "+cacheFile[i].getPath());
-                parseSkipFile(new Path(cacheFile[i].getPath()),conf);
+                parseSkipFile(new Path(cacheFile[i].getPath()), conf);
             }
         }
         else
@@ -63,7 +63,7 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
             for(int i=0;i<cacheFile.length;i++)
             {
                 System.out.println("Local Cache File: "+cacheFile[i]);
-                parseSkipFile(cacheFile[i],conf);
+                parseSkipFile(cacheFile[i], conf);
             }
         }
         for(String s: patternsToSkip)
@@ -130,9 +130,11 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
         String line = null;
         int pos=0;
         boolean first=true;
-        Words w=new Words();
+        ArrayList<Words> list=new ArrayList<Words>();
+        Words w;
         while ((line = reader.readLine()) != null) {
             System.out.println(line);
+            w=new Words();
             if (line.contains(pattern))
             {
                 url=line.substring(7,line.length()-7);
@@ -145,16 +147,42 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
                 continue;
             }
             line=line.replaceAll("[^\\w\\d]"," ");
+            for(String s : patternsToSkip)
+            {
+                line = line.replaceAll(" "+s+" ", " ");
+            };
+            System.out.println(line);
             StringTokenizer contents = new StringTokenizer(line.toLowerCase());
             while (contents.hasMoreTokens()) {
                 String word=contents.nextToken();
-                w.url=url;
-                w.position=pos;
-                context.write(new Text(word), w);
+                Words ww=new Words();
+                System.out.println("Checking: "+word);
+                ww.url=url;
+                ww.position=pos;
+                ww.word=word;
+                //context.write(new Text(word), w);
+                list.add(ww);
                 pos++;
             }
         }
-        w.position=pos;
-        context.write(new Text("URL_Length"),w);
+        Words www=new Words();
+        www.url=url;
+        www.word="";
+        www.doc_len=pos;
+        www.position=pos;
+        context.write(new Text("URL_Length"),www);
+        System.out.println(pos);
+        for (int i=0;i<list.size();i++)
+        {
+            System.out.println(pos);
+            Words words1=list.get(i);
+            Words ww=new Words();
+            ww.doc_len=pos;
+            ww.url= words1.url;
+            ww.position=words1.position;
+            ww.word=words1.word;
+            System.out.println(words1.word+ww.doc_len);
+            context.write(new Text(ww.word), ww);
+        }
     }
 }
