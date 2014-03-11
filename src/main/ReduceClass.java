@@ -19,7 +19,7 @@ import java.util.Map;
  */
 class Reduce extends Reducer<Text, Words, Text, Text> {
 
-    TreeMap map;
+    //TreeMap map;
     /*
     //@Override
     public int compare(List<Integer> s1, List<Integer> s2) {
@@ -30,7 +30,7 @@ class Reduce extends Reducer<Text, Words, Text, Text> {
         Integer length2 = list2.size();
         return length1.compareTo(length2);
     }*/
-
+/*
     Comparator<String> lengthComparator = new Comparator<String>() {
         public int compare(String a,String b) {
             List<Integer> l1 = (List<Integer>)map.get(a);
@@ -40,13 +40,13 @@ class Reduce extends Reducer<Text, Words, Text, Text> {
         }
     };
 
-
+*/
 
     public void reduce(Text key, Iterable<Words> words, Context context)
             throws IOException, InterruptedException {
         String pairs="";
         int count=0;
-        map = new TreeMap<String, List<Integer>>();
+        //map = new TreeMap<String, List<Integer>>();
         String id = context.getTaskAttemptID().getTaskID().toString();
         String output=FileOutputFormat.getOutputPath(context).toString();
         if(output=="") System.out.println("No output path");
@@ -95,15 +95,19 @@ class Reduce extends Reducer<Text, Words, Text, Text> {
         else
         {
             //deal with +id for URL_Length later
-            FSDataOutputStream out = fs.create(new Path(output+"URL_length_"+id));
+            FSDataOutputStream out = fs.create(new Path(output+"URL-length_"+id));
             BufferedWriter br=new BufferedWriter(new OutputStreamWriter(out));
+            String values="";
+            boolean first=true;
             for(Words w: words){
-                String o= w.url+" "+w.position+"\n";
-                System.out.println(o);
-                br.write(o);
+                if(first) first=false;
+                else values=values+"\n";
+                values= values+w.url+" "+w.position;
+                System.out.println(values);
+                //br.write(o);
                 count++;
             }
-            br.write("Total "+count+"\n");
+            br.write("Total "+count+"\n"+values);
             br.close();
         }
     }

@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class Driver {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         //String s = args[0].length() > 0 ? args[0] : "skyline.in";
         Path input, output;
         Configuration conf = new Configuration();
@@ -60,14 +60,16 @@ public class Driver {
         br.close();
 
         //Process p=Runtime.getRuntime().exec("hadoop fs -ls "+ input +" | sed '1d;s/  */ /g' | cut -d\\  -f8 | xargs -n 1 basename");
-        /*BufferedReader br=new BufferedReader(new InputStreamReader(p.getInputStream()));
+        /*
+        BufferedReader br=new BufferedReader(new InputStreamReader(p.getInputStream()));
         String line=br.readLine();
         while(line==br.readLine())
         {
             line=inputfile+line;
             System.out.println(line);
             out.writeChars(line);
-        }*/
+        }
+        */
 
         Job job = new Job(conf, "driver");
 
@@ -100,50 +102,135 @@ public class Driver {
         String home = output.toString();
         if (home.substring(home.length()-1)!="/") home=home+"/";
         for (int i=0;i<status.length;i++){
-            String path=status[i].getPath().toString();
-            if(path.startsWith("_")) fs.delete(status[i].getPath(), true);
-            String[] parts=path.split("_");
+            Path path=status[i].getPath();
+            String name=status[i].getPath().getName();
+            if(name.startsWith("_") || name.contains("part-r"))
+            {
+                System.out.println("deleting "+status[i].getPath());
+                fs.delete(status[i].getPath(), true);
+                continue;
+            }
+            //rename file
+            String[] parts=name.split("_");
+            System.out.println(name);
             String word=parts[0];
-            Path p=new Path(home+parts[0]);
-            if(!fs.exists(p)) out=fs.create(p);
-            else out=fs.append(p);
+            System.out.println("Word: "+word);
+            if(word=="")continue;
+            Path p=new Path(home+word);
+            //System.out.println("BEFORE Creating path: "+p.toString());
+            /*if(!fs.exists(p))
+            {
+                System.out.println("Creating path");
+                out=fs.create(p);
+            }
+            else
+            {
+                System.out.println("Appending path");
+                if(fs.exists(p)) System.out.println("The file already exist");
+                out=fs.create(new Path("_temp"));
+            }*/
+
+            //System.out.println("After Creating path");
             BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(fs.open(status[i].getPath())));
             String line;
             line=bufferedReader.readLine();
+            System.out.println("READING first line");
             Integer count= m.get(word);
             if(count==null) count=0;
+            out=fs.create(new Path(home+"_temp"));
+            boolean first=true;
+            br=new BufferedWriter(new OutputStreamWriter(out));
             while (line != null){
                 System.out.println(line);
-                boolean first=true;
-                if(first)
+                if(first==true)
                 {
+                    System.out.println("Processing First Line");
                     first=false;
                     String[] contents=line.split(" ");
                     count+=Integer.parseInt(contents[1]);
                     m.put(word, count);
                 }
                 else{
-                    br=new BufferedWriter(new OutputStreamWriter(out));
-                    br.write(line);
+                    System.out.println("Processing Second Line: ");
+                    br.write(line+"\n");
                 }
+                line=bufferedReader.readLine();
+            }
+            //br.close();
+            bufferedReader.close();
+            if (fs.exists(p))
+            {
+                System.out.println("Opened: "+p.toString());
+                bufferedReader=new BufferedReader(new InputStreamReader(fs.open(p)));
+                line=bufferedReader.readLine();
+                while (line != null){
+                    //System.out.println("Processing: "+line);
+                     //System.out.println("Processing Second Line: ");
+                    br.write(line+"\n");
+                line=bufferedReader.readLine();
+                }
+            }
+            br.close();
+            bufferedReader.close();
+            fs.rename(new Path(home+"_temp"),p);
+
+            /*
+            String command="hadoop fs -cat ";
+            //fs.rename(p,new Path(home+"__temp__"));
+            if(fs.exists(p))
+            {
+                command=command+home+"__temp__ ";
+                fs.rename(p,new Path(home+"__temp__"));
+            }
+            else
+            {
+                fs.create(p);
+            }
+            command=command+home+"_temp >"+p.toString();
+            System.out.println(command);
+            Runtime r = Runtime.getRuntime();
+            Process process = r.exec(command);
+            process.waitFor();
+            break;
+*/
+            fs.delete(path,true);
+            //fs.delete(new Path(home+"_temp"),true);
+            //fs.delete(new Path(home+"__temp__"),true);
+        }
+
+        for(String s: m.keySet())
+        {
+            System.out.println("Word: "+s);
+            Path temp=new Path(home+"_temp");
+            out=fs.create(temp);
+            br=new BufferedWriter(new OutputStreamWriter(out));
+            br.write(s + " " + m.get(s)+"\n");
+            Path p=new Path(home+s);
+            BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(fs.open(p)));
+            String line=bufferedReader.readLine();
+            while (line != null){
+                //System.out.println("Processing: "+line);
+                //System.out.println("Processing Second Line: ");
+                br.write(line+"\n");
                 line=bufferedReader.readLine();
             }
             br.close();
             bufferedReader.close();
-        }
-        for(String s: m.keySet())
-        {
-            out=fs.create(new Path(home+"__temp__"));
-            br=new BufferedWriter(new OutputStreamWriter(out));
-            br.write(s + " " + m.get(s));
-            br.close();
+            //must delete the file otherwise we can't rename
+            fs.delete(p,true);
+            fs.rename(temp,p);
+            /*br.close();
             fs.rename(new Path(home+s), new Path(home+"_temp_"));
-            String command= "hadoop -fs cat "+home+"__temp__"+" "+home+"_temp_ >"+home+s;
+            fs.create(new Path(home+s));
+            String command= "hadoop fs -cat "+home+"__temp__"+" "+home+"_temp_ >"+home+s;
+            System.out.println(command);
             Runtime r = Runtime.getRuntime();
-            Process p = r.exec(command);
-            fs.delete(new Path(home+"_temp_"),true);
-            fs.delete(new Path(home+"__temp__"),true);
+            Process process = r.exec(command);
+            process.waitFor();*/
+            //fs.delete(new Path(home+"_temp_"),true);
+            //fs.delete(new Path(home+"__temp__"),true);
         }
+//        */
     }
 
 }
