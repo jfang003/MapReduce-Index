@@ -78,6 +78,7 @@ public class Driver {
 
         job.setMapperClass(Map.class);
         job.setReducerClass(Reduce.class);
+        job.setNumReduceTasks(2);
 
         job.setInputFormatClass(TextInputFormat.class);
         //job.setInputFormatClass(CombinedInputFormat.class);
@@ -93,5 +94,56 @@ public class Driver {
             System.out.println("ClassNotFoundException");
         }
 
+        //combine the fs output into one file for each word if in parts
+        status=fs.listStatus(output);
+        HashMap<String,Integer> m=new HashMap<String,Integer>();
+        String home = output.toString();
+        if (home.substring(home.length()-1)!="/") home=home+"/";
+        for (int i=0;i<status.length;i++){
+            String path=status[i].getPath().toString();
+            if(path.startsWith("_")) fs.delete(status[i].getPath(), true);
+            String[] parts=path.split("_");
+            String word=parts[0];
+            Path p=new Path(home+parts[0]);
+            if(!fs.exists(p)) out=fs.create(p);
+            else out=fs.append(p);
+            BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(fs.open(status[i].getPath())));
+            String line;
+            line=bufferedReader.readLine();
+            Integer count= m.get(word);
+            if(count==null) count=0;
+            while (line != null){
+                System.out.println(line);
+                boolean first=true;
+                if(first)
+                {
+                    first=false;
+                    String[] contents=line.split(" ");
+                    count+=Integer.parseInt(contents[1]);
+                    m.put(word, count);
+                }
+                else{
+                    br=new BufferedWriter(new OutputStreamWriter(out));
+                    br.write(line);
+                }
+                line=bufferedReader.readLine();
+            }
+            br.close();
+            bufferedReader.close();
+        }
+        for(String s: m.keySet())
+        {
+            out=fs.create(new Path(home+"__temp__"));
+            br=new BufferedWriter(new OutputStreamWriter(out));
+            br.write(s + " " + m.get(s));
+            br.close();
+            fs.rename(new Path(home+s), new Path(home+"_temp_"));
+            String command= "hadoop -fs cat "+home+"__temp__"+" "+home+"_temp_ >"+home+s;
+            Runtime r = Runtime.getRuntime();
+            Process p = r.exec(command);
+            fs.delete(new Path(home+"_temp_"),true);
+            fs.delete(new Path(home+"__temp__"),true);
+        }
     }
+
 }
