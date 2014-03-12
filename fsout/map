@@ -1,4 +1,4 @@
 map 3
-(www.mit.edu,3,5)
-(www.ucr.edu,3,5)
-(www.uci.edu,5,8)
+(www.mit.edu,3,5,file0.txt,63)
+(www.ucr.edu,3,5,file0.txt,0)
+(www.uci.edu,5,8,file1.txt,0)
