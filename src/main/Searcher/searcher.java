@@ -30,7 +30,7 @@ public class searcher {
         }
     }
 
-    public void run(String Path,String Q) throws IOException {
+    public ArrayList<Results> run(String Path,String Q) throws IOException {
         String input, Query;
         input=Path;
         Query=Q;
@@ -102,7 +102,7 @@ public class searcher {
         //String index_path=input+"index.txt";
         //process_file(index_path);
 
-        query(Query);
+        return query(Query);
     }
 
      public void process_file(String Path) throws IOException {
