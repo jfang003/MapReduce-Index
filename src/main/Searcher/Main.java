@@ -16,7 +16,7 @@ public class Main {
         try {
             query = args[1];
         } catch (ArrayIndexOutOfBoundsException e) {
-            query="map ucr";
+            query="porn";
         }
         MRSearcher searcher=new MRSearcher();
         String[] output=searcher.run(input,query);

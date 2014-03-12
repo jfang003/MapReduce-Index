@@ -6,11 +6,29 @@ import java.util.StringTokenizer;
  */
 public class TagRemover {
     public static void main(String args[]) throws IOException {
-        String Path = args[0];
-        BufferedReader br = new BufferedReader(new FileReader(Path));
+        String InputPath = args[0];
+        String OutputPath=args[1];
+        File folder = new File(InputPath);
+        File[] listOfFiles = folder.listFiles();
+        if(!InputPath.endsWith("/")) InputPath+="/";
+        if(!OutputPath.endsWith("/")) OutputPath+="/";
+        for (int i = 0; i < listOfFiles.length; i++)
+        {
+            if (listOfFiles[i].isFile())
+            {
+                String name = listOfFiles[i].getName();
+                write(InputPath+name,OutputPath+name);
+                System.out.println(name);
+            }
+        }
+    }
+
+    public static void write(String input, String output) throws IOException
+    {
+        BufferedReader br = new BufferedReader(new FileReader(input));
         String line=br.readLine();
         String pattern="##$$$$$";
-        BufferedWriter bw = new BufferedWriter(new FileWriter("temp.txt"));
+        BufferedWriter bw = new BufferedWriter(new FileWriter(output));
         String url;
         while(line!=null)
         {
@@ -24,7 +42,7 @@ public class TagRemover {
             if (word.contains(pattern))
             {
                 url=word;
-                System.out.println(url+" "+line.length());
+                //System.out.println(url+" "+line.length());
             }
             else {
                 System.out.println(line);

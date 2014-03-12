@@ -55,7 +55,12 @@ public class MRSearcher {
         //System.out.println("Lambda="+lambda);
         for(String t: terms)
         {
-            process_file(input,t);
+            try{
+                process_file(input,t);
+            }
+            catch(FileNotFoundException e){
+                System.out.printf("Query term: %s not found\n",t);
+            }
         }
 
         int x = 0;
