@@ -1,4 +1,5 @@
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import java.io.IOException;
@@ -13,6 +14,8 @@ public class Words implements Writable{
     public int position=-1;
     public int doc_len=-1;
     public String word="";
+    public String file="";
+    public Long file_pos=new Long(0);
 
     public Words(){
     }
@@ -29,6 +32,8 @@ public class Words implements Writable{
         this.position=in.readInt();
         this.doc_len=in.readInt();
         this.word=in.readUTF();
+        this.file=in.readUTF();
+        this.file_pos=in.readLong();
     }
 
     /**
@@ -42,5 +47,7 @@ public class Words implements Writable{
         out.writeInt(this.position);
         out.writeInt(this.doc_len);
         out.writeUTF(this.word);
+        out.writeUTF(this.file);
+        out.writeLong(this.file_pos);
     }
 }

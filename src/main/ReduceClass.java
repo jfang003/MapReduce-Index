@@ -62,7 +62,8 @@ class Reduce extends Reducer<Text, Words, Text, Text> {
                 if (first) pairs=pairs+"\n";
                 first=true;
                 System.out.println("Doc_len: "+w.doc_len);
-                pairs+="("+w.url+","+w.position+","+w.doc_len+")";
+                pairs+=String.format("(%w,%d,%d,%w,%d)",w.url,w.position,w.doc_len,w.file,w.file_pos);
+                        //"("+w.url+","+w.position+","+w.doc_len+")";
                 count++;
                 /*List<Integer> values;
                 Object value=map.get(w.url);

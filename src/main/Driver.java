@@ -49,9 +49,11 @@ public class Driver {
             stopwords=new Path("hdfs://localhost.localdomain/user/cloudera/wordcount/patterns.txt");
             //FileSystem.getLocal(conf).delete(output, true);;
         }
+        FSDataOutputStream out;
+        BufferedWriter br;
 
         //conf.set("mapred.max.split.size", "134217728"); // 128 MB
-
+        /*
         FileSystem fs = FileSystem.get(new Configuration());
         if (fs.exists(hdfsinput)) {
             fs.delete(hdfsinput,true);
@@ -67,7 +69,7 @@ public class Driver {
             System.out.println(path);
         }
         br.close();
-
+        */
         //Process p=Runtime.getRuntime().exec("hadoop fs -ls "+ input +" | sed '1d;s/  */ /g' | cut -d\\  -f8 | xargs -n 1 basename");
         /*
         BufferedReader br=new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -93,11 +95,11 @@ public class Driver {
         job.setReducerClass(Reduce.class);
         job.setNumReduceTasks(2);
 
-        job.setInputFormatClass(TextInputFormat.class);
+        job.setInputFormatClass(NonSplittableTextInputFormat.class);
         //job.setInputFormatClass(CombinedInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
 
-        FileInputFormat.addInputPath(job, hdfsinput);
+        FileInputFormat.addInputPath(job, input);
         FileOutputFormat.setOutputPath(job, output);
         try {
             job.waitForCompletion(true);
@@ -108,7 +110,8 @@ public class Driver {
         }
 
         //combine the fs output into one file for each word if in parts
-        status=fs.listStatus(output);
+        FileSystem fs= FileSystem.get(new Configuration());
+        FileStatus[] status=fs.listStatus(output);
         HashMap<String,Integer> m=new HashMap<String,Integer>();
         String home = output.toString();
         if (home.substring(home.length()-1)!="/") home=home+"/";

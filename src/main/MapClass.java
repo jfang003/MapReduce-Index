@@ -29,6 +29,8 @@ import java.util.regex.Matcher;
 class Map extends Mapper<LongWritable, Text, Text, Words>
 {
     private Set<String> patternsToSkip = new HashSet<String>();
+    ArrayList<Words> list=new ArrayList<Words>();
+    String pattern="##$$$$$";
     private void parseSkipFile(Path patternsFile, Configuration conf) throws IOException {
         FSDataInputStream in = FileSystem.get(conf).open(patternsFile);
         try {
@@ -114,10 +116,69 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
             pos++;
         }*/
 
-        process(new Path(value.toString()),context);
+        //process(new Path(value.toString()),context);
+        String url="";
+        String fileString = ((FileSplit) context.getInputSplit()).getPath().getName().toString();
+        System.out.println(fileString);
+        String line=value.toString();
+        System.out.println(line);
+        Words w= new Words();
+        int pos=0;
+
+        StringTokenizer contents = new StringTokenizer(line.toLowerCase());
+        String word;
+        if(contents.hasMoreTokens()) word=contents.nextToken();
+        else {
+            System.out.println("Missing url");
+            return;
+        }
+        if (word.contains(pattern))
+        {
+            url=line.substring(7,word.length()-7);
+            System.out.println(url+" "+line.length());
+        }
+        else {
+            System.out.println(word.contains(pattern)+ " " + word.substring(0,7)+pattern);
+            System.out.println(word);
+            System.out.println("No url in line");
+            return;
+        }
+        System.out.println(line + word.length());
+        line=line.substring(word.length()+1);
+        System.out.println(line);
+        for(String s : patternsToSkip)
+        {
+            line = line.replaceAll(" "+s+" ", " ");
+        };
+        System.out.println("After replace: "+line);
+        line=line.replaceAll("^\\w\\d"," ");
+        System.out.println(url+ " "+ line);
+        contents = new StringTokenizer(line.toLowerCase());
+        while (contents.hasMoreTokens()) {
+            word=contents.nextToken();
+            System.out.println("Checking: "+word);
+            Words ww=new Words();
+            ww.url=url;
+            ww.position=pos;
+            ww.word=word;
+            ww.file=fileString;
+            ww.file_pos=key.get();
+            //context.write(new Text(word), w);
+            list.add(ww);
+            pos++;
+        }
+        for (int i=0;i<list.size();i++)
+        {
+            System.out.println(pos);
+            Words ww=list.get(i);
+            ww.doc_len=pos;
+            System.out.println(i+" "+ww.word+" "+ww.doc_len);
+            context.write(new Text(ww.word), ww);
+        }
     }
 
     //process a file
+    /*
     protected void process(Path file, Context context) throws IOException,
             InterruptedException {
         String url="";
@@ -202,5 +263,5 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
             System.out.println(words1.word+ww.doc_len);
             context.write(new Text(ww.word), ww);
         }
-    }
+    }*/
 }
