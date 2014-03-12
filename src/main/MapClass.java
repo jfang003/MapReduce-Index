@@ -103,20 +103,23 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
             System.out.println("No url in line");
             return;
         }
-        System.out.println(line + word.length());
+        //System.out.println(line + word.length());
         line=line.substring(word.length()+1);
-        System.out.println(line);
+        //System.out.println(line);
+        /*
         for(String s : patternsToSkip)
         {
             line = line.replaceAll(" "+s+" ", " ");
-        };
-        System.out.println("After replace: "+line);
-        line=line.replaceAll("^\\w\\d", " ");
+        };*/
+        //System.out.println("After replace: "+line);
+        //line=line.toLowerCase().replaceAll("[^a-z]"," ");
+        //line=line.toLowerCase().replaceAll("[^a-z ]","");
         System.out.println(url+ " "+ line);
-        contents = new StringTokenizer(line.toLowerCase());
+        contents = new StringTokenizer(line);
         while (contents.hasMoreTokens()) {
             word=contents.nextToken();
-            System.out.println("Checking: "+word);
+            if(patternsToSkip.contains(word)) continue;
+            //System.out.println("Checking: "+word);
             Words ww=new Words();
             ww.url=url;
             ww.position=pos;
@@ -129,10 +132,10 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
         }
         for (int i=0;i<list.size();i++)
         {
-            System.out.println(pos);
+            //System.out.println(pos);
             Words ww=list.get(i);
             ww.doc_len=pos;
-            System.out.println(i+" "+ww.word+" "+ww.doc_len);
+            //System.out.println(i+" "+ww.word+" "+ww.doc_len);
             context.write(new Text(ww.word), ww);
         }
         context.write(new Text("URL_Length"), w);

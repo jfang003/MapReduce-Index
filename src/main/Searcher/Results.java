@@ -8,7 +8,9 @@ import java.util.Comparator;
  */
 public class Results {
     public String url;
-    ArrayList<Integer> pos=new ArrayList<Integer>();
-    Float score;
+    public ArrayList<Integer> pos=new ArrayList<Integer>();
+    public Float score;
+    public String file;
+    public Integer file_pos;
 }
 

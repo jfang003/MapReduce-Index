@@ -155,8 +155,8 @@ public class Driver {
             boolean first=true;
             br=new BufferedWriter(new OutputStreamWriter(out));
             while (line != null){
-                System.out.println(line);
-                if(first==true)
+                //System.out.println(line);
+                /*if(first==true)
                 {
                     System.out.println("Processing First Line");
                     first=false;
@@ -164,10 +164,10 @@ public class Driver {
                     count+=Integer.parseInt(contents[1]);
                     m.put(word, count);
                 }
-                else{
-                    System.out.println("Processing Second Line: ");
+                else{*/
+                    //System.out.println("Processing Second Line: ");
                     br.write(line+"\n");
-                }
+                //}
                 line=bufferedReader.readLine();
             }
             //br.close();
@@ -213,7 +213,7 @@ public class Driver {
         }
 
 
-        for(String s: m.keySet())
+        /*for(String s: m.keySet())
         {
             System.out.println("Word: "+s);
             Path temp=new Path(home+"_temp");
@@ -244,7 +244,7 @@ public class Driver {
             process.waitFor();*/
             //fs.delete(new Path(home+"_temp_"),true);
             //fs.delete(new Path(home+"__temp__"),true);
-        }
+
 //        */
     }
 

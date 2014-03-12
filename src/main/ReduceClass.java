@@ -49,8 +49,8 @@ class Reduce extends Reducer<Text, Words, Text, Text> {
         //map = new TreeMap<String, List<Integer>>();
         String id = context.getTaskAttemptID().getTaskID().toString();
         String output=FileOutputFormat.getOutputPath(context).toString();
-        if(output=="") System.out.println("No output path");
-        else System.out.println(output);
+        //if(output=="") System.out.println("No output path");
+        //else System.out.println(output);
         if(output.substring(output.length()-1)!="/") output+="/";
         FileSystem fs = FileSystem.get(new Configuration());
         if(key.toString().contains("URL_Length")==false)
@@ -61,13 +61,14 @@ class Reduce extends Reducer<Text, Words, Text, Text> {
             for(Words w: words){
                 if (first) pairs=pairs+"\n";
                 first=true;
-                System.out.println("Doc_len: "+w.doc_len);
-                String value=String.format("(%s,%d,%s,%s,%d)",w.url,w.position,w.doc_len,w.file,w.file_pos);
-                pairs+=value;
+                //System.out.println("Doc_len: "+w.doc_len);
+                String value=String.format("(%s,%d,%s,%s,%d)\n",w.url,w.position,w.doc_len,w.file,w.file_pos);
+                //pairs+=value;
                         //"("+w.url+","+w.position+","+w.doc_len+")";
+                br.write(value);
                 count++;
             }
-            br.write(key.toString()+" "+count+"\n"+pairs+"\n");
+            //br.write(key.toString()+" "+count+"\n"+pairs+"\n");
             br.close();
         }
         else
