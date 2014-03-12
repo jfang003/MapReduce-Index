@@ -10,13 +10,13 @@ import java.util.*;
  */
 public class searcher {
 
-    public static Integer total_docs=0;
-    //public static HashMap<String,Integer> length=new HashMap<String, Integer>();
-    public static HashMap<String,URLMap> ranking=new HashMap<String, URLMap>();
-    public static Double lambda = 0.1;
-    public static Set<String> urls= new HashSet<String>();
+    public  Integer total_docs=0;
+    //public  HashMap<String,Integer> length=new HashMap<String, Integer>();
+    public  HashMap<String,URLMap> ranking=new HashMap<String, URLMap>();
+    public  Double lambda = 0.1;
+    public  Set<String> urls= new HashSet<String>();
 
-    static class ResultsComparator implements Comparator<Results>
+     class ResultsComparator implements Comparator<Results>
     {
         public int compare(Results a, Results b)
         {
@@ -30,18 +30,11 @@ public class searcher {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public void run(String Path,String Q) throws IOException {
         String input, Query;
-        try {
-            input = args[0];
-        } catch (ArrayIndexOutOfBoundsException e) {
-            input = "./fsout/";
-        }
-        try{
-            Query=args[1];
-        } catch(ArrayIndexOutOfBoundsException e) {
-            Query = "map ucr";
-        }
+        input=Path;
+        Query=Q;
+
         //read index
         if(input.substring(input.length()-1)!="/") input=input+"/";
 
@@ -112,7 +105,7 @@ public class searcher {
         query(Query);
     }
 
-    static public void process_file(String Path) throws IOException {
+     public void process_file(String Path) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(Path));
         try {
             String line = br.readLine();
@@ -170,7 +163,7 @@ public class searcher {
         }
     }
       
-    static public void process_length(String Path) throws IOException {
+     public void process_length(String Path) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(Path));
         try{
             String line = br.readLine();
@@ -201,7 +194,7 @@ public class searcher {
         }
     }
 
-    public static float rank(String url, Integer total, int appears, Integer doc_len)
+    public  float rank(String url, Integer total, int appears, Integer doc_len)
     {
         //Integer doc_len;
         //if(url!="default") doc_len= length.get(url);
@@ -215,7 +208,7 @@ public class searcher {
         return new Float(score);
     }
 
-    public static ArrayList query(String Q){
+    public  ArrayList query(String Q){
         ArrayList<Results> res= new ArrayList<Results>();
         String[]contents=Q.split("\\s");
         HashMap<String,URLInfo> scores=new HashMap<String, URLInfo>();
