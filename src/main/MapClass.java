@@ -29,7 +29,6 @@ import java.util.regex.Matcher;
 class Map extends Mapper<LongWritable, Text, Text, Words>
 {
     private Set<String> patternsToSkip = new HashSet<String>();
-    ArrayList<Words> list=new ArrayList<Words>();
     String pattern="##$$$$$";
     private void parseSkipFile(Path patternsFile, Configuration conf) throws IOException {
         FSDataInputStream in = FileSystem.get(conf).open(patternsFile);
@@ -76,47 +75,8 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
     //Override
     protected void map(LongWritable key, Text value, Context context)
             throws IOException, InterruptedException {
-        //String url="";
-        //String pattern="##$$$$$";
-        //int pos = 0;
-        /*
-
-        for(Text t: value)
-        {
-            String line=value.toString();
-            if (line.substring(0,7)==pattern)
-            {
-                url=line.substring(7,line.length()-7);
-                pos=0;
-                continue;
-            }
-            line=line.replaceAll("[^\\w\\d]"," ");
-            StringTokenizer contents = new StringTokenizer(line.toLowerCase());
-            while (contents.hasMoreTokens()) {
-                String word=contents.nextToken();
-                Words w=new Words();
-                w.url=url;
-                w.position=pos;
-                context.write(new Text(word), w);
-                pos++;
-            }
-        }*/
-
-        //, " ,?!:;()<>[]\b\t\n\f\r\"\'\\\""
-        /*FileSplit fileSplit = (FileSplit)context.getInputSplit();
-        String filename = fileSplit.getPath().getName();
-        System.out.println("File name "+filename+"\n Directory and File name"+fileSplit.getPath().toString()+value.toString());
-        StringTokenizer contents = new StringTokenizer(value.toString().toLowerCase());
-        while (contents.hasMoreTokens()) {
-            String word=contents.nextToken();
-            Words w=new Words();
-            w.url=url;
-            w.position=pos;
-            context.write(new Text(word), w);
-            pos++;
-        }*/
-
         //process(new Path(value.toString()),context);
+        ArrayList<Words> list=new ArrayList<Words>();
         String url="";
         String fileString = ((FileSplit) context.getInputSplit()).getPath().getName().toString();
         System.out.println(fileString);
@@ -151,7 +111,7 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
             line = line.replaceAll(" "+s+" ", " ");
         };
         System.out.println("After replace: "+line);
-        line=line.replaceAll("^\\w\\d"," ");
+        line=line.replaceAll("^\\w\\d", " ");
         System.out.println(url+ " "+ line);
         contents = new StringTokenizer(line.toLowerCase());
         while (contents.hasMoreTokens()) {
@@ -175,6 +135,7 @@ class Map extends Mapper<LongWritable, Text, Text, Words>
             System.out.println(i+" "+ww.word+" "+ww.doc_len);
             context.write(new Text(ww.word), ww);
         }
+        context.write(new Text("URL_Length"), w);
     }
 
     //process a file

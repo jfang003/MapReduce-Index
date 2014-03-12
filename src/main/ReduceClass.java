@@ -62,35 +62,11 @@ class Reduce extends Reducer<Text, Words, Text, Text> {
                 if (first) pairs=pairs+"\n";
                 first=true;
                 System.out.println("Doc_len: "+w.doc_len);
-                pairs+=String.format("(%w,%d,%d,%w,%d)",w.url,w.position,w.doc_len,w.file,w.file_pos);
+                String value=String.format("(%s,%d,%s,%s,%d)",w.url,w.position,w.doc_len,w.file,w.file_pos);
+                pairs+=value;
                         //"("+w.url+","+w.position+","+w.doc_len+")";
                 count++;
-                /*List<Integer> values;
-                Object value=map.get(w.url);
-                if(value==null) values= new ArrayList();
-                else values=(List<Integer>) value;
-                if(values==null) System.out.println("Values is null");
-                values.add(w.position);
-                map.put(w.url,values);
-                System.out.printf("Key %s, url %s %d\n", key.toString(),w.url,w.position);*/
             }
-            /*
-            System.out.println("Mapped "+map.toString());
-            ArrayList<String> set=new ArrayList<String>(map.keySet());
-
-            for (int j=0;j<set.size();j++) {
-                String k = set.get(j);
-                List<Integer> value = (List<Integer>)map.get(k);
-                System.out.printf("%s : %s\n",k, value.toString());
-                pairs=pairs+"["+k+",(";
-                boolean first=true;
-                for(int i=0;i<value.size();i++)
-                {
-                    if(!first) pairs=pairs+",";
-                    pairs=pairs+value.get(i);
-                }
-                pairs=pairs+")] ";
-            }*/
             br.write(key.toString()+" "+count+"\n"+pairs+"\n");
             br.close();
         }
@@ -115,3 +91,30 @@ class Reduce extends Reducer<Text, Words, Text, Text> {
     }
 
 }
+
+                /*List<Integer> values;
+                Object value=map.get(w.url);
+                if(value==null) values= new ArrayList();
+                else values=(List<Integer>) value;
+                if(values==null) System.out.println("Values is null");
+                values.add(w.position);
+                map.put(w.url,values);
+                System.out.printf("Key %s, url %s %d\n", key.toString(),w.url,w.position);*/
+//}
+            /*
+            System.out.println("Mapped "+map.toString());
+            ArrayList<String> set=new ArrayList<String>(map.keySet());
+
+            for (int j=0;j<set.size();j++) {
+                String k = set.get(j);
+                List<Integer> value = (List<Integer>)map.get(k);
+                System.out.printf("%s : %s\n",k, value.toString());
+                pairs=pairs+"["+k+",(";
+                boolean first=true;
+                for(int i=0;i<value.size();i++)
+                {
+                    if(!first) pairs=pairs+",";
+                    pairs=pairs+value.get(i);
+                }
+                pairs=pairs+")] ";
+            }*/
